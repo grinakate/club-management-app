@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   postgres:
-    container_name: club_management_db
+    container_name: db
     image: postgres:16.2-alpine
     environment:
       - POSTGRES_USER=club_management
@@ -11,3 +11,15 @@ services:
       - '5432:5432'
     volumes:
       - ./database/initial.sql:/docker-entrypoint-initdb.d/initial.sql
+  server:
+    container_name: server
+    build: /server/club-management-parent
+    ports:
+      - '8080:8080'
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/club_management?currentSchema=club_management
+      SPRING_DATASOURCE_USERNAME: club_management
+      SPRING_DATASOURCE_PASSWORD: club_management
+      LOGGING_LEVEL_ROOT: DEBUG
+    depends_on:
+      - postgres

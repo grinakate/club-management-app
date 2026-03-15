@@ -2,28 +2,28 @@ CREATE SCHEMA club_management;
 ALTER DATABASE club_management SET search_path TO club_management;
 ALTER SCHEMA club_management OWNER TO club_management;
 
-CREATE TYPE user_role AS ENUM ('participant', 'admin', 'manager');
-CREATE TYPE user_status AS ENUM ('active', 'blocked', 'pending');
-CREATE TYPE club_status AS ENUM ('draft', 'active', 'archived');
-CREATE TYPE application_status AS ENUM ('new', 'approved', 'rejected', 'cancelled');
-CREATE TYPE membership_role AS ENUM ('member', 'moderator', 'admin');
-CREATE TYPE membership_status AS ENUM ('active', 'suspended', 'left');
-CREATE TYPE event_status AS ENUM ('draft', 'published', 'cancelled', 'completed');
-CREATE TYPE registration_status AS ENUM ('registered', 'cancelled', 'waitlist', 'attended');
-CREATE TYPE notification_channel AS ENUM ('in_app', 'email', 'telegram');
-CREATE TYPE delivery_status AS ENUM ('queued', 'sent', 'delivered', 'failed');
+CREATE TYPE user_role AS ENUM ('PARTICIPANT', 'ADMIN', 'MANAGER');
+CREATE TYPE user_status AS ENUM ('ACTIVE', 'BLOCKED', 'PENDING');
+CREATE TYPE club_status AS ENUM ('DRAFT', 'ACTIVE', 'ARCHIVED');
+CREATE TYPE application_status AS ENUM ('NEW', 'APPROVED', 'REJECTED', 'CANCELLED');
+CREATE TYPE membership_role AS ENUM ('MEMBER', 'MODERATOR', 'ADMIN');
+CREATE TYPE membership_status AS ENUM ('ACTIVE', 'SUSPENDED', 'LEFT');
+CREATE TYPE event_status AS ENUM ('DRAFT', 'PUBLISHED', 'CANCELLED', 'COMPLETED');
+CREATE TYPE registration_status AS ENUM ('REGISTERED', 'CANCELLED', 'WAITLIST', 'ATTENDED');
+CREATE TYPE notification_channel AS ENUM ('IN_APP', 'EMAIL', 'TELEGRAM');
+CREATE TYPE delivery_status AS ENUM ('QUEUED', 'SENT', 'DELIVERED', 'FAILED');
 
 CREATE TABLE "user"
 (
-    user_id       BIGINT NOT NULL PRIMARY KEY,
-    full_name     VARCHAR(150),
-    email         VARCHAR(255),
+    user_id       BIGINT       NOT NULL PRIMARY KEY,
+    full_name     VARCHAR(150) NOT NULL,
+    email         VARCHAR(255) NOT NULL,
     phone         VARCHAR(20),
-    password_hash VARCHAR(255),
+    password_hash VARCHAR(255) NOT NULL,
     city          VARCHAR(100),
     interests     TEXT,
-    role          user_role,
-    status        user_status
+    role          user_role    NOT NULL,
+    status        user_status  NOT NULL
 );
 CREATE SEQUENCE user_seq START WITH 1 INCREMENT BY 1;
 

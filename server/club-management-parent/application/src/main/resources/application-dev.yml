@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/club_management?currentSchema=club_management
+    username: club_management
+    password: club_management
