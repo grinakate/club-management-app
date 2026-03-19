@@ -46,7 +46,7 @@ VALUES (1, 'Спорт и фитнес'),
        (8, 'Кино и литература'),
        (9, 'Волонтерство'),
        (10, 'Карьера и бизнес');
-CREATE SEQUENCE category_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE category_seq START WITH 11 INCREMENT BY 1;
 
 CREATE TABLE club
 (
