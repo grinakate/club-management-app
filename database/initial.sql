@@ -17,27 +17,49 @@ CREATE TABLE "user"
 (
     user_id       BIGINT       NOT NULL PRIMARY KEY,
     full_name     VARCHAR(150) NOT NULL,
-    email         VARCHAR(255) NOT NULL,
-    phone         VARCHAR(20),
+    email         VARCHAR(255) UNIQUE,
+    phone         VARCHAR(20) UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     city          VARCHAR(100),
     interests     TEXT,
     role          user_role    NOT NULL,
-    status        user_status  NOT NULL
+    status        user_status  NOT NULL,
+    birth_date    DATE         NOT NULL,
+    created_at    TIMESTAMP    NOT NULL,
+    CHECK (email IS NOT NULL or phone IS NOT NULL )
 );
 CREATE SEQUENCE user_seq START WITH 1 INCREMENT BY 1;
 
+CREATE TABLE category
+(
+    id   BIGINT       NOT NULL PRIMARY KEY,
+    name VARCHAR(200) NOT NULL UNIQUE
+);
+INSERT INTO category (id, name)
+VALUES (1, 'Спорт и фитнес'),
+       (2, 'ИТ и программирование'),
+       (3, 'Настольные игры'),
+       (4, 'Иностранные языки'),
+       (5, 'Творчество и искусство'),
+       (6, 'Музыка и вокал'),
+       (7, 'Наука и технологии'),
+       (8, 'Кино и литература'),
+       (9, 'Волонтерство'),
+       (10, 'Карьера и бизнес');
+CREATE SEQUENCE category_seq START WITH 11 INCREMENT BY 1;
+
 CREATE TABLE club
 (
-    club_id        BIGINT NOT NULL PRIMARY KEY,
-    name           VARCHAR(200),
+    club_id        BIGINT       NOT NULL PRIMARY KEY,
+    name           VARCHAR(200) NOT NULL UNIQUE,
     description    TEXT,
-    category       VARCHAR(100),
+    category_id    BIGINT       NOT NULL,
     age_limit_min  INTEGER,
     age_limit_max  INTEGER,
     membership_fee DECIMAL(10, 2),
-    owner_user_id  BIGINT,
-    status         club_status,
+    owner_user_id  BIGINT       NOT NULL,
+    status         club_status  NOT NULL,
+    created_at     TIMESTAMP    NOT NULL,
     CONSTRAINT fk_club_owner_user_id
         FOREIGN KEY (owner_user_id)
             REFERENCES "user" (user_id)
@@ -46,11 +68,11 @@ CREATE SEQUENCE club_seq START WITH 1 INCREMENT BY 1;
 
 CREATE TABLE membership_application
 (
-    application_id BIGINT NOT NULL PRIMARY KEY,
-    club_id        BIGINT,
-    user_id        BIGINT,
+    application_id BIGINT             NOT NULL PRIMARY KEY,
+    club_id        BIGINT             NOT NULL,
+    user_id        BIGINT             NOT NULL,
     applied_at     TIMESTAMP,
-    status         application_status,
+    status         application_status NOT NULL,
     reviewed_by    BIGINT,
     reviewed_at    TIMESTAMP,
     comment        VARCHAR(500),
@@ -68,12 +90,13 @@ CREATE SEQUENCE application_seq START WITH 1 INCREMENT BY 1;
 
 CREATE TABLE club_membership
 (
-    membership_id BIGINT NOT NULL PRIMARY KEY,
-    club_id       BIGINT,
-    user_id       BIGINT,
-    joined_at     TIMESTAMP,
-    member_role   membership_role,
-    status        membership_status,
+    membership_id BIGINT            NOT NULL PRIMARY KEY,
+    club_id       BIGINT            NOT NULL,
+    user_id       BIGINT            NOT NULL,
+    joined_at     TIMESTAMP         NOT NULL,
+    member_role   membership_role   NOT NULL,
+    status        membership_status NOT NULL,
+    UNIQUE (club_id, user_id),
     CONSTRAINT fk_membership_club_id
         FOREIGN KEY (club_id)
             REFERENCES club (club_id),
@@ -83,49 +106,36 @@ CREATE TABLE club_membership
 );
 CREATE SEQUENCE membership_seq START WITH 1 INCREMENT BY 1;
 
-CREATE TABLE venue
-(
-    venue_id BIGINT NOT NULL PRIMARY KEY,
-    name     VARCHAR(150),
-    address  VARCHAR(255),
-    room     VARCHAR(100),
-    capacity INTEGER,
-    comment  VARCHAR(500)
-);
-CREATE SEQUENCE venue_seq START WITH 1 INCREMENT BY 1;
-
 CREATE TABLE event
 (
-    event_id          BIGINT NOT NULL PRIMARY KEY,
-    club_id           BIGINT,
-    venue_id          BIGINT,
-    created_by        TIMESTAMP,
-    title             VARCHAR(200),
+    event_id          BIGINT       NOT NULL PRIMARY KEY,
+    status            event_status NOT NULL,
+    club_id           BIGINT       NOT NULL,
+    title             VARCHAR(200) NOT NULL,
     description       TEXT,
-    start_at          TIMESTAMP,
-    end_at            TIMESTAMP,
+    start_at          TIMESTAMP    NOT NULL,
+    end_at            TIMESTAMP    NOT NULL,
     participant_limit INTEGER,
     price             DECIMAL(10, 2),
-    is_paid           BOOLEAN,
-    is_recurring      BOOLEAN,
-    status            event_status,
+    created_by        BIGINT       NOT NULL,
     CONSTRAINT fk_event_club_id
         FOREIGN KEY (club_id)
             REFERENCES club (club_id),
-    CONSTRAINT fk_event_venue_id
-        FOREIGN KEY (venue_id)
-            REFERENCES venue (venue_id)
+    CONSTRAINT fk_event_created_by
+        FOREIGN KEY (created_by)
+            REFERENCES "user" (user_id)
 );
 CREATE SEQUENCE event_seq START WITH 1 INCREMENT BY 1;
 
 CREATE TABLE event_registration
 (
-    registration_id BIGINT NOT NULL PRIMARY KEY,
-    event_id        BIGINT,
-    user_id         BIGINT,
-    registered_at   TIMESTAMP,
-    status          membership_status,
+    registration_id BIGINT            NOT NULL PRIMARY KEY,
+    event_id        BIGINT            NOT NULL,
+    user_id         BIGINT            NOT NULL,
+    registered_at   TIMESTAMP         NOT NULL,
+    status          membership_status NOT NULL,
     attendance_mark BOOLEAN,
+    UNIQUE (event_id, user_id),
     CONSTRAINT fk_registration_event_id
         FOREIGN KEY (event_id)
             REFERENCES event (event_id),
@@ -137,21 +147,24 @@ CREATE SEQUENCE event_registration_seq START WITH 1 INCREMENT BY 1;
 
 CREATE TABLE notification
 (
-    notification_id BIGINT NOT NULL PRIMARY KEY,
-    user_id         BIGINT,
+    notification_id BIGINT            NOT NULL PRIMARY KEY,
+    user_id         BIGINT            NOT NULL,
     event_id        BIGINT,
-    channel         BIGINT,
-    subject         VARCHAR(200),
+    club_id         BIGINT,
+    subject         VARCHAR(200)      NOT NULL,
     message_text    TEXT,
-    scheduled_at    TIMESTAMP,
-    sent_at         TIMESTAMP,
-    delivery_status membership_status,
+    scheduled_at    TIMESTAMP         NOT NULL,
+    sent_at         TIMESTAMP         NOT NULL,
+    delivery_status membership_status NOT NULL,
     CONSTRAINT fk_notification_event_id
         FOREIGN KEY (event_id)
             REFERENCES event (event_id),
     CONSTRAINT fk_notification_user_id
         FOREIGN KEY (user_id)
-            REFERENCES "user" (user_id)
+            REFERENCES "user" (user_id),
+    CONSTRAINT fk_notification_club_id
+        FOREIGN KEY (club_id)
+            REFERENCES club (club_id)
 );
 CREATE SEQUENCE notification_seq START WITH 1 INCREMENT BY 1;
 
