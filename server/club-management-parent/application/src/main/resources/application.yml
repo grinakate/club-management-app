@@ -27,6 +27,9 @@ spring:
         persistence:
           sharedCache:
             mode: ENABLE_SELECTIVE
+  web:
+    error:
+      include-message: ALWAYS
 
 management:
   endpoints:

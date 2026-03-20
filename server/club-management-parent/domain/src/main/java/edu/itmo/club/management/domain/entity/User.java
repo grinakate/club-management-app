@@ -17,6 +17,8 @@ import lombok.Setter;
 import org.hibernate.annotations.JdbcType;
 import org.hibernate.dialect.type.PostgreSQLEnumJdbcType;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
@@ -36,7 +38,7 @@ public class User {
 	private Long id;
 
 	@NonNull
-	@Column(name = "full_name")
+	@Column(name = "full_name", nullable = false)
 	private String fullName;
 
 	@NonNull
@@ -47,7 +49,7 @@ public class User {
 	private String phone;
 
 	@NonNull
-	@Column(name = "password_hash")
+	@Column(name = "password_hash", nullable = false)
 	private String password;
 
 	@Column(name = "city")
@@ -67,6 +69,14 @@ public class User {
 	@JdbcType(PostgreSQLEnumJdbcType.class)
 	@Column(name = "status", nullable = false)
 	private UserStatus status;
+
+	@NonNull
+	@Column(name = "birth_date", nullable = false)
+	private LocalDate birthDate;
+
+	@NonNull
+	@Column(name = "created_at", nullable = false)
+	private LocalDateTime createdAt;
 
 	@Override
 	public boolean equals(Object o) {

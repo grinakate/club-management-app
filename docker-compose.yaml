@@ -20,6 +20,5 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/club_management?currentSchema=club_management
       SPRING_DATASOURCE_USERNAME: club_management
       SPRING_DATASOURCE_PASSWORD: club_management
-      LOGGING_LEVEL_ROOT: DEBUG
     depends_on:
       - postgres

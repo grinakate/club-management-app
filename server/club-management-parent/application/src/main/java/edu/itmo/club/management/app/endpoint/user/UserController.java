@@ -1,9 +1,8 @@
 package edu.itmo.club.management.app.endpoint.user;
 
 import edu.itmo.club.management.app.endpoint.user.dto.CreateUserRequest;
-import edu.itmo.club.management.app.endpoint.user.dto.CreateUserResponse;
 import edu.itmo.club.management.app.endpoint.user.dto.UpdateUserRequest;
-import edu.itmo.club.management.app.endpoint.user.dto.UserDto;
+import edu.itmo.club.management.app.endpoint.user.dto.UserResponse;
 import edu.itmo.club.management.app.mapper.UserMapper;
 import edu.itmo.club.management.domain.entity.User;
 import edu.itmo.club.management.service.business.user.UserService;
@@ -32,7 +31,7 @@ import java.util.Optional;
 @Transactional
 @RestController
 @AllArgsConstructor
-@RequestMapping("/api/users")
+@RequestMapping("/api/v1")
 public class UserController {
 
 	private final UserService service;
@@ -43,9 +42,9 @@ public class UserController {
 	 *
 	 * @return список пользователей.
 	 */
-	@GetMapping
-	public List<UserDto> findAll() {
-		return mapper.mapToDto(service.findAll());
+	@GetMapping("/users")
+	public List<UserResponse> findAll() {
+		return mapper.mapToResponse(service.findAll());
 	}
 
 	/**
@@ -54,11 +53,11 @@ public class UserController {
 	 * @param id ИД пользователя.
 	 * @return Данные пользователя.
 	 */
-	@GetMapping(value = "/{id}")
-	public UserDto findById(@NotNull @PathVariable("id") Long id) {
+	@GetMapping(value = "/users/{id}")
+	public UserResponse findById(@NotNull @PathVariable("id") Long id) {
 		Optional<User> user = service.findById(id);
 		if (user.isPresent()) {
-			return mapper.mapToDto(user.get());
+			return mapper.mapToResponse(user.get());
 		} else {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
 		}
@@ -70,10 +69,17 @@ public class UserController {
 	 * @param request Данные нового пользователя.
 	 * @return ИД созданного пользователя.
 	 */
-	@PostMapping
-	public CreateUserResponse create(@Valid @RequestBody CreateUserRequest request) {
-		User user = mapper.mapToEntity(request);
-		return new CreateUserResponse(service.save(user).getId());
+	@PostMapping("/users")
+	public UserResponse create(@Valid @RequestBody CreateUserRequest request) {
+		if (request.getEmail() == null || request.getPhone() == null) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+					"У пользователя должен быть заполнен номер телефона или email");
+		}
+
+		User user = mapper.mapForCreateParticipant(request);
+		User savedUser = service.save(user);
+
+		return mapper.mapToResponse(savedUser);
 	}
 
 	/**
@@ -83,9 +89,9 @@ public class UserController {
 	 * @param request Новые данные пользователя.
 	 * @return Обновленные данные пользователя.
 	 */
-	@PutMapping("/{id}")
-	public UserDto put(@NotNull @PathVariable("id") Long id,
-					   @Valid @RequestBody UpdateUserRequest request) {
+	@PutMapping("/users/{id}")
+	public UserResponse put(@NotNull @PathVariable("id") Long id,
+							@Valid @RequestBody UpdateUserRequest request) {
 		Optional<User> userOpt = service.findById(id);
 		if (userOpt.isEmpty()) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
@@ -94,6 +100,6 @@ public class UserController {
 		mapper.mapForUpdate(user, request);
 		User updatedUser = service.save(user);
 
-		return mapper.mapToDto(updatedUser);
+		return mapper.mapToResponse(updatedUser);
 	}
 }

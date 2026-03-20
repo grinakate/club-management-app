@@ -5,11 +5,14 @@ import edu.itmo.club.management.domain.enums.UserStatus;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 /**
  * ДТО с информацией о пользователе.
  */
 @Data
-public class UserDto {
+public class UserResponse {
 
 	@NotNull
 	private Long id;
@@ -26,8 +29,14 @@ public class UserDto {
 	private String interests;
 
 	@NotNull
+	private LocalDate birthDate;
+
+	@NotNull
 	private UserRole role;
 
 	@NotNull
 	private UserStatus status;
+
+	@NotNull
+	private LocalDateTime createdAt;
 }
