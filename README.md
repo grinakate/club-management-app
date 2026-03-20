@@ -22,9 +22,19 @@ main/
 docker compose up -d
 ```
 Приложения доступны по адресам:
+- database: http://localhost:5432
 - client: http://localhost:3000
 - server: http://localhost:8080
-- database: http://localhost:5432
+- swagger: http://localhost:8080/swagger-ui/index.html
+
+### Модуль авторизации/регистрации
+- `POST /api/auth/register` - регистрация нового пользователя
+- `POST /api/auth/login` - логирование, получение JWT токена
+
+### Модуль пользователей
+- `GET /api/users` - получение списка пользователей
+- `GET /api/users/{id}` - получение пользователя по ИД 
+- `PUT /api/users/{id}/profile` - редактирование пользователя
 
 ## Авторы
 - Зорина Яна
@@ -33,3 +43,4 @@ docker compose up -d
 - Гусева Екатерина
 - Денисов Илья
 - Ишанова Надежда
+
