@@ -4,6 +4,8 @@ import edu.itmo.club.management.domain.entity.User;
 import edu.itmo.club.management.domain.repository.UserRepository;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,5 +36,26 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public User save(@NotNull User user) {
 		return repository.save(user);
+	}
+
+	@NotNull
+	@Override
+	public Optional<User> findByLogin(@NotNull String login) {
+		return repository.findByLogin(login);
+	}
+
+	@Override
+	public boolean existByEmail(String email) {
+		return repository.existsByEmail(email);
+	}
+
+	@Override
+	public boolean existByPhone(String phone) {
+		return repository.existsByPhone(phone);
+	}
+
+	@Override
+	public User loadUserByUsername(String id) throws UsernameNotFoundException {
+		return repository.findById(Long.parseLong(id)).orElseThrow();
 	}
 }

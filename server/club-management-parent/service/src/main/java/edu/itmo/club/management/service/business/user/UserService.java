@@ -2,6 +2,7 @@ package edu.itmo.club.management.service.business.user;
 
 import edu.itmo.club.management.domain.entity.User;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.List;
 import java.util.Optional;
@@ -9,7 +10,7 @@ import java.util.Optional;
 /**
  * Сервис для сущности {@link User}.
  */
-public interface UserService {
+public interface UserService extends UserDetailsService {
 
 	/**
 	 * Метод получения всех пользователей.
@@ -36,4 +37,11 @@ public interface UserService {
 	 */
 	@NotNull
 	User save(@NotNull User user);
+
+	@NotNull
+	Optional<User> findByLogin(@NotNull String login);
+
+	boolean existByEmail(@NotNull String email);
+
+	boolean existByPhone(@NotNull String phone);
 }

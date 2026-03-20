@@ -20,5 +20,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/club_management?currentSchema=club_management
       SPRING_DATASOURCE_USERNAME: club_management
       SPRING_DATASOURCE_PASSWORD: club_management
+      JWT_SECRET_KEY: 'very-secure-secret-key-32-characters-long'
+      JWT_EXPIRATION_MS: 86400000
     depends_on:
       - postgres

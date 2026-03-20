@@ -1,4 +1,4 @@
-package edu.itmo.club.management.app.endpoint.user.dto;
+package edu.itmo.club.management.app.endpoint.dto;
 
 import edu.itmo.club.management.domain.enums.UserRole;
 import edu.itmo.club.management.domain.enums.UserStatus;

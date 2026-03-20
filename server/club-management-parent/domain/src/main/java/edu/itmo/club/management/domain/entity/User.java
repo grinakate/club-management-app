@@ -16,9 +16,14 @@ import lombok.NonNull;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcType;
 import org.hibernate.dialect.type.PostgreSQLEnumJdbcType;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -28,7 +33,7 @@ import java.util.Objects;
 @Getter
 @Setter
 @Table(name = "\"user\"")
-public class User {
+public class User implements UserDetails {
 
 	@Id
 	@NonNull
@@ -41,7 +46,6 @@ public class User {
 	@Column(name = "full_name", nullable = false)
 	private String fullName;
 
-	@NonNull
 	@Column(name = "email")
 	private String email;
 
@@ -77,6 +81,36 @@ public class User {
 	@NonNull
 	@Column(name = "created_at", nullable = false)
 	private LocalDateTime createdAt;
+
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		return List.of(new SimpleGrantedAuthority(role.name()));
+	}
+
+	@Override
+	public String getUsername() {
+		return email != null ? email : phone;
+	}
+
+	@Override
+	public boolean isAccountNonExpired() {
+		return status.equals(UserStatus.ACTIVE);
+	}
+
+	@Override
+	public boolean isAccountNonLocked() {
+		return status.equals(UserStatus.ACTIVE);
+	}
+
+	@Override
+	public boolean isCredentialsNonExpired() {
+		return true;
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return status.equals(UserStatus.ACTIVE);
+	}
 
 	@Override
 	public boolean equals(Object o) {

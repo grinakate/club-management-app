@@ -1,15 +1,18 @@
 package edu.itmo.club.management.app.mapper;
 
-import edu.itmo.club.management.app.endpoint.user.dto.CreateUserRequest;
-import edu.itmo.club.management.app.endpoint.user.dto.UpdateUserRequest;
-import edu.itmo.club.management.app.endpoint.user.dto.UserResponse;
+import edu.itmo.club.management.app.endpoint.dto.UserRegisterRequest;
+import edu.itmo.club.management.app.endpoint.dto.UserUpdateRequest;
+import edu.itmo.club.management.app.endpoint.dto.UserResponse;
 import edu.itmo.club.management.domain.entity.User;
 import edu.itmo.club.management.domain.enums.UserRole;
 import edu.itmo.club.management.domain.enums.UserStatus;
+import lombok.Setter;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,6 +22,9 @@ import java.util.List;
  */
 @Mapper(componentModel = "spring")
 public abstract class UserMapper {
+
+	@Setter(onMethod_ = {@Autowired})
+	protected PasswordEncoder passwordEncoder;
 
 	/**
 	 * Метод маппит сущность пользователя в ДТО.
@@ -46,9 +52,9 @@ public abstract class UserMapper {
 	@Mapping(target = "status", ignore = true)
 	@Mapping(target = "role", ignore = true)
 	@Mapping(target = "createdAt", ignore = true)
-	@Mapping(target = "password", expression = "java(source.getPassword())")
-	// TODO: encode(source.getPassword()), когда добавим авторизацию
-	public abstract User mapForCreateParticipant(CreateUserRequest source);
+	@Mapping(target = "password", expression = "java(passwordEncoder.encode(source.getPassword()))")
+	@Mapping(target = "authorities", ignore = true)
+	public abstract User mapForCreateParticipant(UserRegisterRequest source);
 
 	@AfterMapping
 	protected void afterMapping(@MappingTarget User target) {
@@ -68,5 +74,5 @@ public abstract class UserMapper {
 	@Mapping(target = "status", ignore = true)
 	@Mapping(target = "password", ignore = true)
 	@Mapping(target = "createdAt", ignore = true)
-	public abstract void mapForUpdate(@MappingTarget User target, UpdateUserRequest source);
+	public abstract void mapForUpdate(@MappingTarget User target, UserUpdateRequest source);
 }

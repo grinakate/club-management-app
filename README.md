@@ -27,11 +27,14 @@ docker compose up -d
 - server: http://localhost:8080
 - swagger: http://localhost:8080/swagger-ui/index.html
 
+### Модуль авторизации/регистрации
+- `POST /api/auth/register` - регистрация нового пользователя
+- `POST /api/auth/login` - логирование, получение JWT токена
+
 ### Модуль пользователей
 - `GET /api/users` - получение списка пользователей
 - `GET /api/users/{id}` - получение пользователя по ИД 
-- `POST /api/users` - создание нового пользователя
-- `PUT /api/users/{id}` - редактирование пользователя
+- `PUT /api/users/{id}/profile` - редактирование пользователя
 
 ## Авторы
 - Зорина Яна

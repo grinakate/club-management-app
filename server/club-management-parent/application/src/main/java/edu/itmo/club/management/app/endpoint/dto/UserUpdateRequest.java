@@ -1,4 +1,4 @@
-package edu.itmo.club.management.app.endpoint.user.dto;
+package edu.itmo.club.management.app.endpoint.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -7,11 +7,11 @@ import lombok.Data;
 import java.time.LocalDate;
 
 /**
- * Запрос для создания пользователя.
+ * Запрос для создания/обновления данных пользователя.
  * TODO: валидация входных параметров
  */
 @Data
-public class CreateUserRequest {
+public class UserUpdateRequest {
 
 	@NotNull
 	private String fullName;
@@ -27,7 +27,4 @@ public class CreateUserRequest {
 
 	@NotNull
 	private LocalDate birthDate;
-
-	@NotNull
-	private String password;
 }
