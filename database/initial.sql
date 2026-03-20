@@ -28,7 +28,10 @@ CREATE TABLE "user"
     created_at    TIMESTAMP    NOT NULL,
     CHECK (email IS NOT NULL or phone IS NOT NULL )
 );
-CREATE SEQUENCE user_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE user_seq START WITH 2 INCREMENT BY 1;
+
+INSERT INTO "user" (user_id, full_name, email, password_hash, role, status, birth_date, created_at)
+VALUES (1, 'Администратор', 'admin@club.ru', '$2b$10$nNvWY9bhtwjCPqNPxxyCauhxWhNrTrXHUQf1VSm/dgrOfEX4aolJS', 'ADMIN', 'ACTIVE', '1990-01-01', now());
 
 CREATE TABLE category
 (
@@ -62,7 +65,10 @@ CREATE TABLE club
     created_at     TIMESTAMP    NOT NULL,
     CONSTRAINT fk_club_owner_user_id
         FOREIGN KEY (owner_user_id)
-            REFERENCES "user" (user_id)
+            REFERENCES "user" (user_id),
+    CONSTRAINT fk_club_category_id
+        FOREIGN KEY (category_id)
+            REFERENCES category (id)
 );
 CREATE SEQUENCE club_seq START WITH 1 INCREMENT BY 1;
 
@@ -133,7 +139,7 @@ CREATE TABLE event_registration
     event_id        BIGINT            NOT NULL,
     user_id         BIGINT            NOT NULL,
     registered_at   TIMESTAMP         NOT NULL,
-    status          membership_status NOT NULL,
+    status          registration_status NOT NULL,
     attendance_mark BOOLEAN,
     UNIQUE (event_id, user_id),
     CONSTRAINT fk_registration_event_id
@@ -154,8 +160,10 @@ CREATE TABLE notification
     subject         VARCHAR(200)      NOT NULL,
     message_text    TEXT,
     scheduled_at    TIMESTAMP         NOT NULL,
-    sent_at         TIMESTAMP         NOT NULL,
-    delivery_status membership_status NOT NULL,
+    sent_at         TIMESTAMP,
+    channel         notification_channel NOT NULL DEFAULT 'IN_APP',
+    is_read         BOOLEAN              NOT NULL DEFAULT false,
+    delivery_status delivery_status      NOT NULL,
     CONSTRAINT fk_notification_event_id
         FOREIGN KEY (event_id)
             REFERENCES event (event_id),

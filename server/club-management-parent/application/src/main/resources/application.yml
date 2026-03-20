@@ -35,9 +35,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*"
+        include: health,info
   endpoint:
-    env:
-      show-values: always
-    configprops:
-      show-values: always
+    health:
+      show-details: when-authorized

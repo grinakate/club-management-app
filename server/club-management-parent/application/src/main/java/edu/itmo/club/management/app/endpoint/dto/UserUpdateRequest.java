@@ -1,19 +1,13 @@
 package edu.itmo.club.management.app.endpoint.dto;
 
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-import java.time.LocalDate;
-
-/**
- * Запрос для создания/обновления данных пользователя.
- * TODO: валидация входных параметров
- */
 @Data
 public class UserUpdateRequest {
 
-	@NotNull
+	@Size(max = 150)
 	private String fullName;
 
 	@Email
@@ -24,7 +18,4 @@ public class UserUpdateRequest {
 	private String city;
 
 	private String interests;
-
-	@NotNull
-	private LocalDate birthDate;
 }
