@@ -155,3 +155,16 @@ nbdist/
 #history
 *.xml.orig
 *.java.orig
+
+# Cursor IDE
+.cursor/
+.cursorignore
+.cursorindexingignore
+
+# Frontend
+client/node_modules/
+client/dist/
+
+# Local Spring profiles
+application-local.yml
+**/application-local.yml

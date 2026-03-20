@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableJpaRepositories(basePackages = "edu.itmo.club.management.domain.repository")
 public class ClubManagementApplication {
 
-	static void main(String[] args) {
+	public static void main(String[] args) {
 		SpringApplication.run(ClubManagementApplication.class, args);
 	}
 }

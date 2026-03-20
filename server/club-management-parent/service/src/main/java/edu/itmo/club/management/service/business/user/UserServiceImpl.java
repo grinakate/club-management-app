@@ -56,6 +56,11 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User loadUserByUsername(String id) throws UsernameNotFoundException {
-		return repository.findById(Long.parseLong(id)).orElseThrow();
+		try {
+			return repository.findById(Long.parseLong(id))
+					.orElseThrow(() -> new UsernameNotFoundException("Пользователь с id=" + id + " не найден"));
+		} catch (NumberFormatException e) {
+			throw new UsernameNotFoundException("Некорректный идентификатор пользователя: " + id, e);
+		}
 	}
 }

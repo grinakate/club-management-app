@@ -1,0 +1,74 @@
+export interface User {
+  id: number
+  fullName: string
+  email: string | null
+  phone: string | null
+  city: string | null
+  interests: string | null
+  role: 'PARTICIPANT' | 'ADMIN' | 'MANAGER'
+  status: 'ACTIVE' | 'BLOCKED' | 'PENDING'
+  birthDate: string
+  createdAt: string
+}
+
+export interface Club {
+  id: number
+  name: string
+  description: string | null
+  categoryId: number
+  categoryName?: string
+  ageLimitMin: number | null
+  ageLimitMax: number | null
+  membershipFee: number | null
+  ownerUserId: number
+  status: 'DRAFT' | 'ACTIVE' | 'ARCHIVED'
+  createdAt: string
+}
+
+export interface Category {
+  id: number
+  name: string
+}
+
+export interface Event {
+  id: number
+  clubId: number
+  clubName?: string
+  title: string
+  description: string | null
+  startAt: string
+  endAt: string
+  participantLimit: number | null
+  price: number | null
+  status: 'DRAFT' | 'PUBLISHED' | 'CANCELLED' | 'COMPLETED'
+  createdBy: number
+}
+
+export interface EventRegistration {
+  id: number
+  eventId: number
+  userId: number
+  userFullName?: string
+  registeredAt: string
+  status: 'REGISTERED' | 'CANCELLED' | 'WAITLIST' | 'ATTENDED'
+  attendanceMark: boolean | null
+}
+
+export interface LoginRequest {
+  login: string
+  password: string
+}
+
+export interface RegisterRequest {
+  fullName: string
+  email: string | null
+  phone: string | null
+  password: string
+  city: string | null
+  interests: string | null
+  birthDate: string
+}
+
+export interface TokenResponse {
+  token: string
+}

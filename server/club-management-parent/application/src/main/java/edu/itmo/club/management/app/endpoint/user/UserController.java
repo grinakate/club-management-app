@@ -1,5 +1,6 @@
 package edu.itmo.club.management.app.endpoint.user;
 
+import edu.itmo.club.management.app.endpoint.dto.PasswordChangeRequest;
 import edu.itmo.club.management.app.endpoint.dto.UserResponse;
 import edu.itmo.club.management.app.endpoint.dto.UserUpdateRequest;
 import edu.itmo.club.management.app.mapper.UserMapper;
@@ -11,6 +12,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,7 +39,7 @@ public class UserController {
 
 	private final UserService service;
 	private final UserMapper mapper;
-	private final UserService userService;
+	private final PasswordEncoder passwordEncoder;
 
 	/**
 	 * Метод получения всех пользователей в приложении.
@@ -44,6 +47,7 @@ public class UserController {
 	 * @return список пользователей.
 	 */
 	@GetMapping("/users")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	public List<UserResponse> findAll() {
 		return mapper.mapToResponse(service.findAll());
 	}
@@ -55,6 +59,7 @@ public class UserController {
 	 * @return Данные пользователя.
 	 */
 	@GetMapping(value = "/users/{id}")
+	@PreAuthorize("hasAuthority('ADMIN') or #id == authentication.principal.id")
 	public UserResponse findById(@NotNull @PathVariable("id") Long id) {
 		Optional<User> user = service.findById(id);
 		if (user.isPresent()) {
@@ -62,6 +67,24 @@ public class UserController {
 		} else {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
 		}
+	}
+
+	@GetMapping("/users/me")
+	public UserResponse getCurrentUser(@AuthenticationPrincipal User user) {
+		return mapper.mapToResponse(user);
+	}
+
+	@PutMapping("/users/me/password")
+	public ResponseEntity<?> changePassword(@AuthenticationPrincipal User user,
+											@Valid @RequestBody PasswordChangeRequest request) {
+		if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Неверный текущий пароль");
+		}
+
+		user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+		service.save(user);
+
+		return ResponseEntity.ok("Пароль успешно изменен");
 	}
 
 	/**
@@ -75,20 +98,20 @@ public class UserController {
 	@PreAuthorize("#id == authentication.principal.id")
 	public ResponseEntity<?> updateProfile(@NotNull @PathVariable("id") Long id,
 										   @Valid @RequestBody UserUpdateRequest request) {
-		var userOpt = userService.findById(id);
+		var userOpt = service.findById(id);
 		if (userOpt.isEmpty()) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Пользователь не найден");
 		}
 
 		User user = userOpt.get();
 		if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
-			if (userService.existByEmail(request.getEmail())) {
+			if (service.existByEmail(request.getEmail())) {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Этот Email уже занят");
 			}
 		}
 
 		if (request.getPhone() != null && !request.getPhone().equals(user.getPhone())) {
-			if (userService.existByEmail(request.getPhone())) {
+			if (service.existByPhone(request.getPhone())) {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Этот Номер телефона уже занят");
 			}
 		}
