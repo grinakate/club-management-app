@@ -8,6 +8,7 @@ import edu.itmo.club.management.domain.enums.ApplicationStatus;
 import edu.itmo.club.management.domain.enums.MembershipRole;
 import edu.itmo.club.management.domain.enums.MembershipStatus;
 import edu.itmo.club.management.domain.repository.MembershipApplicationRepository;
+import edu.itmo.club.management.service.business.notification.NotificationService;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,7 @@ public class MembershipApplicationServiceImpl implements MembershipApplicationSe
 
 	private final MembershipApplicationRepository repository;
 	private final ClubMembershipService membershipService;
+	private final NotificationService notificationService;
 
 	@NotNull
 	@Override
@@ -112,6 +114,8 @@ public class MembershipApplicationServiceImpl implements MembershipApplicationSe
 			membership.setStatus(MembershipStatus.ACTIVE);
 			membershipService.save(membership);
 		}
-		return repository.save(application);
+		MembershipApplication saved = repository.save(application);
+		notificationService.notifyApplicantOnApplicationReviewed(saved);
+		return saved;
 	}
 }

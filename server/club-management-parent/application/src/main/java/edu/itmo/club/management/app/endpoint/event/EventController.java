@@ -15,7 +15,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,7 +30,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Transactional
+@Validated
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1")
@@ -51,7 +51,7 @@ public class EventController {
 				EventStatus eventStatus = EventStatus.valueOf(status.toUpperCase());
 				return eventMapper.mapToResponse(eventService.findByStatus(eventStatus));
 			} catch (IllegalArgumentException e) {
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректный статус: " + status);
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректный статус мероприятия");
 			}
 		}
 		return eventMapper.mapToResponse(eventService.findAll());
@@ -70,21 +70,13 @@ public class EventController {
 		Club club = clubService.findById(request.getClubId())
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Клуб не найден"));
 
-		if (!club.getOwner().getId().equals(user.getId())) {
-			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Создавать мероприятия может только владелец клуба");
-		}
-
 		if (request.getStartAt() != null && request.getEndAt() != null
 				&& !request.getEndAt().isAfter(request.getStartAt())) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Дата окончания должна быть позже даты начала");
 		}
 
 		Event event = eventMapper.mapForCreate(request);
-		event.setClub(club);
-		event.setCreatedBy(user);
-		event.setStatus(EventStatus.PUBLISHED);
-
-		return eventMapper.mapToResponse(eventService.save(event));
+		return eventMapper.mapToResponse(eventService.createEvent(club, user, event));
 	}
 
 	@PutMapping("/events/{id}")
@@ -111,16 +103,7 @@ public class EventController {
 	@DeleteMapping("/events/{id}")
 	public ResponseEntity<Void> cancel(@AuthenticationPrincipal User user,
 									   @PathVariable Long id) {
-		Event event = eventService.findById(id)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Мероприятие не найдено"));
-
-		if (!event.getCreatedBy().getId().equals(user.getId())) {
-			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Только создатель может отменить мероприятие");
-		}
-
-		event.setStatus(EventStatus.CANCELLED);
-		eventService.save(event);
-
+		eventService.cancelEvent(id, user.getId());
 		return ResponseEntity.noContent().build();
 	}
 }
