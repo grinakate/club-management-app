@@ -88,7 +88,7 @@ public class ClubController {
 	}
 
 	@PutMapping("/clubs/{id}")
-	@PreAuthorize("@clubService.findById(#id).isPresent() && @clubService.findById(#id).get().owner.id == authentication.principal.id")
+	@PreAuthorize("@clubServiceImpl.findById(#id).isPresent() && @clubServiceImpl.findById(#id).get().owner.id == authentication.principal.id")
 	public ClubResponse update(@PathVariable("id") Long id,
 							   @Valid @RequestBody ClubUpdateRequest request) {
 		if (request.getAgeLimitMin() != null && request.getAgeLimitMax() != null
@@ -111,7 +111,7 @@ public class ClubController {
 	}
 
 	@DeleteMapping("/clubs/{id}")
-	@PreAuthorize("@clubService.findById(#id).isPresent() && @clubService.findById(#id).get().owner.id == authentication.principal.id")
+	@PreAuthorize("@clubServiceImpl.findById(#id).isPresent() && @clubServiceImpl.findById(#id).get().owner.id == authentication.principal.id")
 	public ResponseEntity<Void> archive(@PathVariable("id") Long id) {
 		Club club = clubService.findById(id)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Клуб не найден"));

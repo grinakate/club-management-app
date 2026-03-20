@@ -48,7 +48,7 @@
               </div>
               <div>
                 <span class="text-sm text-gray-500">Владелец</span>
-                <div class="font-semibold">ID: {{ club.ownerUserId }}</div>
+                <div class="font-semibold">{{ club.ownerFullName }}</div>
               </div>
               <div>
                 <span class="text-sm text-gray-500">Дата создания</span>

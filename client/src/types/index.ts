@@ -21,6 +21,7 @@ export interface Club {
   ageLimitMax: number | null
   membershipFee: number | null
   ownerUserId: number
+  ownerFullName: string
   status: 'DRAFT' | 'ACTIVE' | 'ARCHIVED'
   createdAt: string
 }
