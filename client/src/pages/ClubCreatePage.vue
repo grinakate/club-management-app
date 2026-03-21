@@ -160,7 +160,9 @@ async function onSubmit() {
   }
 }
 
-onMounted(() => {
-  clubStore.fetchCategories()
+onMounted(async () => {
+  try {
+    await clubStore.fetchCategories()
+  } catch {}
 })
 </script>

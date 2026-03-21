@@ -40,7 +40,7 @@
                 <span>{{ formatDate(event.endAt) }}</span>
               </div>
 
-              <div v-if="event.participantLimit" class="flex items-center gap-2">
+              <div v-if="event.participantLimit != null" class="flex items-center gap-2">
                 <i class="pi pi-users text-gray-500" />
                 <span class="font-medium">Лимит участников:</span>
                 <span>{{ event.participantLimit }}</span>
@@ -49,7 +49,7 @@
               <div class="flex items-center gap-2">
                 <i class="pi pi-wallet text-gray-500" />
                 <span class="font-medium">Цена:</span>
-                <span>{{ event.price ? `${event.price} ₽` : 'Бесплатно' }}</span>
+                <span>{{ event.price != null ? `${event.price} ₽` : 'Бесплатно' }}</span>
               </div>
             </div>
 
@@ -57,7 +57,6 @@
               <RegistrationButton
                 :event-id="event.id"
                 :event-status="event.status"
-                :participant-limit="event.participantLimit"
               />
             </div>
 
@@ -106,6 +105,7 @@ import { useToast } from 'primevue/usetoast'
 import { useEventStore } from '../stores/event'
 import { useAuthStore } from '../stores/auth'
 import RegistrationButton from '../components/RegistrationButton.vue'
+import type { Event } from '../types'
 
 const route = useRoute()
 const router = useRouter()
@@ -116,7 +116,7 @@ const authStore = useAuthStore()
 const event = computed(() => eventStore.currentEvent)
 const isOwner = computed(() => event.value?.createdBy === authStore.user?.id)
 
-function statusSeverity(status: string) {
+function statusSeverity(status: Event['status']) {
   const map: Record<string, string> = {
     PUBLISHED: 'success',
     CANCELLED: 'danger',
@@ -126,7 +126,7 @@ function statusSeverity(status: string) {
   return map[status] ?? 'secondary'
 }
 
-function statusLabel(status: string) {
+function statusLabel(status: Event['status']) {
   const map: Record<string, string> = {
     PUBLISHED: 'Опубликовано',
     CANCELLED: 'Отменено',
@@ -162,8 +162,10 @@ async function handleCancelEvent() {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   const id = Number(route.params.id)
-  eventStore.fetchEventById(id)
+  try {
+    await eventStore.fetchEventById(id)
+  } catch {}
 })
 </script>

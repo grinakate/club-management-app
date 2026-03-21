@@ -1,5 +1,4 @@
 import axios from 'axios'
-import router from '../router'
 
 const http = axios.create({
   baseURL: '/api',
@@ -18,13 +17,9 @@ http.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token')
-
       const { useAuthStore } = await import('../stores/auth')
       const authStore = useAuthStore()
-      authStore.$patch({ token: null, user: null })
-
-      router.push({ name: 'login' })
+      authStore.logout()
     }
     return Promise.reject(error)
   }

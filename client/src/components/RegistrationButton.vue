@@ -51,7 +51,6 @@ import type { EventRegistration } from '../types'
 const props = defineProps<{
   eventId: number
   eventStatus: string
-  participantLimit: number | null
 }>()
 
 const emit = defineEmits<{
@@ -70,8 +69,10 @@ async function loadMyRegistration() {
       data.find(
         (r) => r.eventId === props.eventId && r.status !== 'CANCELLED'
       ) ?? null
-  } catch {
+  } catch (err: unknown) {
     myRegistration.value = null
+    const axiosErr = err as { response?: { data?: { message?: string } } }
+    toast.add({ severity: 'error', summary: 'Ошибка', detail: axiosErr.response?.data?.message || 'Не удалось загрузить данные', life: 4000 })
   } finally {
     loading.value = false
   }

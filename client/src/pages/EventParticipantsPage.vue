@@ -115,7 +115,9 @@ async function handleAttendance(registration: EventRegistration) {
   }
 }
 
-onMounted(() => {
-  registrationStore.fetchEventRegistrations(eventId.value)
+onMounted(async () => {
+  try {
+    await registrationStore.fetchEventRegistrations(eventId.value)
+  } catch {}
 })
 </script>

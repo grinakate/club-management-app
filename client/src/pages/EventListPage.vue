@@ -45,11 +45,11 @@
             <div class="flex items-center gap-2">
               <Tag :value="statusLabel(event.status)" :severity="statusSeverity(event.status)" />
             </div>
-            <div v-if="event.participantLimit" class="flex items-center gap-2">
+            <div v-if="event.participantLimit != null" class="flex items-center gap-2">
               <i class="pi pi-users text-gray-500" />
               <span>Лимит: {{ event.participantLimit }}</span>
             </div>
-            <div v-if="event.price" class="flex items-center gap-2">
+            <div v-if="event.price != null" class="flex items-center gap-2">
               <i class="pi pi-wallet text-gray-500" />
               <span>{{ event.price }} ₽</span>
             </div>
@@ -84,7 +84,7 @@ const router = useRouter()
 const eventStore = useEventStore()
 const authStore = useAuthStore()
 
-const statusFilter = ref<string | null>(null)
+const statusFilter = ref<'DRAFT' | 'PUBLISHED' | 'CANCELLED' | 'COMPLETED' | null>(null)
 
 const statusOptions = [
   { label: 'Опубликовано', value: 'PUBLISHED' },
@@ -123,9 +123,11 @@ function formatDate(iso: string) {
   })
 }
 
-function loadEvents() {
+async function loadEvents() {
   const params = statusFilter.value ? { status: statusFilter.value } : undefined
-  eventStore.fetchEvents(params)
+  try {
+    await eventStore.fetchEvents(params)
+  } catch {}
 }
 
 watch(statusFilter, loadEvents)

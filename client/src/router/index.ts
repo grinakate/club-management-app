@@ -1,4 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import 'vue-router'
+
+declare module 'vue-router' {
+  interface RouteMeta {
+    requiresAuth?: boolean
+    roles?: string[]
+  }
+}
 
 const router = createRouter({
   history: createWebHistory(),
@@ -29,6 +37,14 @@ const router = createRouter({
           meta: { roles: ['ADMIN', 'MANAGER'] }
         },
         { path: 'clubs/:id', name: 'club-detail', component: () => import('../pages/ClubDetailPage.vue') },
+        { path: 'clubs/:id/apply', name: 'club-apply', component: () => import('../pages/ClubApplicationPage.vue') },
+        {
+          path: 'clubs/:id/applications',
+          name: 'club-applications',
+          component: () => import('../pages/ClubApplicationsListPage.vue'),
+          meta: { roles: ['ADMIN', 'MANAGER'] }
+        },
+        { path: 'clubs/:id/members', name: 'club-members', component: () => import('../pages/ClubMembersPage.vue') },
         { path: 'events', name: 'events', component: () => import('../pages/EventListPage.vue') },
         {
           path: 'events/create',
@@ -62,7 +78,7 @@ router.beforeEach(async (to, _from, next) => {
     return next({ path: '/' })
   }
 
-  const requiredRoles = to.meta.roles as string[] | undefined
+  const requiredRoles = to.meta.roles
   if (requiredRoles && token) {
     const { useAuthStore } = await import('../stores/auth')
     const authStore = useAuthStore()
