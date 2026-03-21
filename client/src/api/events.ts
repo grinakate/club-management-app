@@ -18,11 +18,11 @@ export interface EventUpdatePayload {
   endAt?: string
   participantLimit?: number | null
   price?: number | null
-  status?: string
+  status?: 'DRAFT' | 'PUBLISHED' | 'CANCELLED' | 'COMPLETED'
 }
 
 export const eventsApi = {
-  getAll(params?: { clubId?: number; status?: string }) {
+  getAll(params?: { clubId?: number; status?: 'DRAFT' | 'PUBLISHED' | 'CANCELLED' | 'COMPLETED' }) {
     return http.get<Event[]>('/v1/events', { params })
   },
   getById(id: number) {

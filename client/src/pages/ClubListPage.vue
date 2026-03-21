@@ -45,7 +45,7 @@
           <p class="text-gray-600 line-clamp-3 mb-3">
             {{ club.description || 'Описание отсутствует' }}
           </p>
-          <div v-if="club.membershipFee" class="text-sm font-semibold text-primary mb-3">
+          <div v-if="club.membershipFee != null" class="text-sm font-semibold text-primary mb-3">
             Взнос: {{ club.membershipFee }} ₽
           </div>
         </template>
@@ -97,9 +97,11 @@ const filteredClubs = computed(() => {
 })
 
 onMounted(async () => {
-  await Promise.all([
-    clubStore.fetchClubs(),
-    clubStore.fetchCategories()
-  ])
+  try {
+    await Promise.all([
+      clubStore.fetchClubs(),
+      clubStore.fetchCategories()
+    ])
+  } catch {}
 })
 </script>

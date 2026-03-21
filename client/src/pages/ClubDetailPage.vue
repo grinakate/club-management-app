@@ -43,7 +43,7 @@
               <div>
                 <span class="text-sm text-gray-500">Членский взнос</span>
                 <div class="font-semibold">
-                  {{ club.membershipFee ? `${club.membershipFee} ₽` : 'Бесплатно' }}
+                  {{ club.membershipFee != null ? `${club.membershipFee} ₽` : 'Бесплатно' }}
                 </div>
               </div>
               <div>
@@ -59,20 +59,61 @@
         </Card>
       </div>
 
-      <div v-if="isOwner" class="flex gap-3 mt-6">
-        <Button
-          label="Редактировать"
-          icon="pi pi-pencil"
-          @click="onEdit"
-        />
-        <Button
-          v-if="club.status === 'ACTIVE'"
-          label="Архивировать"
-          icon="pi pi-inbox"
-          severity="warn"
-          variant="outlined"
-          @click="onArchive"
-        />
+      <div class="flex flex-wrap gap-3 mt-6">
+        <template v-if="isOwner">
+          <Button
+            label="Редактировать"
+            icon="pi pi-pencil"
+            @click="onEdit"
+          />
+          <Button
+            label="Участники"
+            icon="pi pi-users"
+            severity="secondary"
+            variant="outlined"
+            @click="router.push({ name: 'club-members', params: { id: clubId } })"
+          />
+          <Button
+            label="Заявки"
+            icon="pi pi-list"
+            severity="secondary"
+            variant="outlined"
+            @click="router.push({ name: 'club-applications', params: { id: clubId } })"
+          />
+          <Button
+            v-if="club.status === 'ACTIVE'"
+            label="Архивировать"
+            icon="pi pi-inbox"
+            severity="warn"
+            variant="outlined"
+            @click="onArchive"
+          />
+        </template>
+        <template v-else>
+          <Button
+            v-if="!isActiveMember && club.status === 'ACTIVE'"
+            label="Подать заявку"
+            icon="pi pi-send"
+            @click="router.push({ name: 'club-apply', params: { id: clubId } })"
+          />
+          <Button
+            v-if="isActiveMember"
+            label="Покинуть клуб"
+            icon="pi pi-sign-out"
+            severity="danger"
+            variant="outlined"
+            :loading="leavingClub"
+            @click="onLeave"
+          />
+          <Button
+            v-if="isActiveMember"
+            label="Участники"
+            icon="pi pi-users"
+            severity="secondary"
+            variant="outlined"
+            @click="router.push({ name: 'club-members', params: { id: clubId } })"
+          />
+        </template>
       </div>
 
       <Card class="mt-6 shadow-md">
@@ -113,6 +154,7 @@ import { useToast } from 'primevue/usetoast'
 import { useClubStore } from '../stores/club'
 import { useAuthStore } from '../stores/auth'
 import { useEventStore } from '../stores/event'
+import { useMembershipStore } from '../stores/membership'
 import type { Event } from '../types'
 
 const route = useRoute()
@@ -121,13 +163,18 @@ const toast = useToast()
 const clubStore = useClubStore()
 const authStore = useAuthStore()
 const eventStore = useEventStore()
+const membershipStore = useMembershipStore()
 
 const clubEvents = ref<Event[]>([])
 const eventsLoading = ref(false)
+const leavingClub = ref(false)
 
 const club = computed(() => clubStore.currentClub)
 const clubId = computed(() => Number(route.params.id))
 const isOwner = computed(() => club.value && authStore.user && club.value.ownerUserId === authStore.user.id)
+const isActiveMember = computed(() =>
+  membershipStore.members.some(m => m.userId === authStore.user?.id && m.status === 'ACTIVE')
+)
 
 const statusSeverity = computed(() => {
   switch (club.value?.status) {
@@ -141,9 +188,9 @@ const statusSeverity = computed(() => {
 const ageRange = computed(() => {
   const min = club.value?.ageLimitMin
   const max = club.value?.ageLimitMax
-  if (min && max) return `${min} — ${max} лет`
-  if (min) return `от ${min} лет`
-  if (max) return `до ${max} лет`
+  if (min != null && max != null) return `${min} — ${max} лет`
+  if (min != null) return `от ${min} лет`
+  if (max != null) return `до ${max} лет`
   return 'Без ограничений'
 })
 
@@ -193,8 +240,29 @@ async function loadEvents() {
   }
 }
 
+async function onLeave() {
+  if (!club.value) return
+  leavingClub.value = true
+  try {
+    await membershipStore.leaveClub(club.value.id)
+    await membershipStore.fetchMembers(clubId.value)
+    toast.add({ severity: 'success', summary: 'Вы покинули клуб', life: 3000 })
+  } catch (e: unknown) {
+    const axiosErr = e as { response?: { data?: { message?: string } } }
+    toast.add({ severity: 'error', summary: 'Ошибка', detail: axiosErr.response?.data?.message || 'Не удалось покинуть клуб', life: 4000 })
+  } finally {
+    leavingClub.value = false
+  }
+}
+
 onMounted(async () => {
-  await clubStore.fetchClubById(clubId.value)
+  try {
+    await clubStore.fetchClubById(clubId.value)
+    await membershipStore.fetchMembers(clubId.value)
+  } catch (e: unknown) {
+    const axiosErr = e as { response?: { data?: { message?: string } } }
+    toast.add({ severity: 'error', summary: 'Ошибка', detail: axiosErr.response?.data?.message || 'Не удалось загрузить данные', life: 4000 })
+  }
   loadEvents()
 })
 </script>

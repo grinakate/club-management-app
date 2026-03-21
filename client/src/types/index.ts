@@ -55,6 +55,30 @@ export interface EventRegistration {
   attendanceMark: boolean | null
 }
 
+export interface MembershipApplication {
+  id: number
+  clubId: number
+  clubName: string
+  userId: number
+  userFullName: string
+  appliedAt: string
+  status: 'NEW' | 'APPROVED' | 'REJECTED' | 'CANCELLED'
+  reviewedByFullName: string | null
+  reviewedAt: string | null
+  comment: string | null
+}
+
+export interface ClubMembership {
+  id: number
+  clubId: number
+  clubName: string
+  userId: number
+  userFullName: string
+  joinedAt: string
+  memberRole: 'MEMBER' | 'MODERATOR' | 'ADMIN'
+  status: 'ACTIVE' | 'SUSPENDED' | 'LEFT'
+}
+
 export interface LoginRequest {
   login: string
   password: string

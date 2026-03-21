@@ -9,7 +9,7 @@ export const useEventStore = defineStore('event', () => {
   const currentEvent = ref<Event | null>(null)
   const loading = ref(false)
 
-  async function fetchEvents(params?: { clubId?: number; status?: string }) {
+  async function fetchEvents(params?: { clubId?: number; status?: 'DRAFT' | 'PUBLISHED' | 'CANCELLED' | 'COMPLETED' }) {
     loading.value = true
     try {
       const { data } = await eventsApi.getAll(params)

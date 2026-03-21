@@ -27,7 +27,7 @@
           <p class="text-gray-600 line-clamp-3 mb-3">
             {{ club.description || 'Описание отсутствует' }}
           </p>
-          <div v-if="club.membershipFee" class="text-sm font-semibold text-primary mb-3">
+          <div v-if="club.membershipFee != null" class="text-sm font-semibold text-primary mb-3">
             Взнос: {{ club.membershipFee }} ₽
           </div>
         </template>
@@ -57,7 +57,9 @@ import { useClubStore } from '../stores/club'
 const router = useRouter()
 const clubStore = useClubStore()
 
-onMounted(() => {
-  clubStore.fetchMyClubs()
+onMounted(async () => {
+  try {
+    await clubStore.fetchMyClubs()
+  } catch {}
 })
 </script>
