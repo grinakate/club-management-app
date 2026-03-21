@@ -79,6 +79,20 @@ export interface ClubMembership {
   status: 'ACTIVE' | 'SUSPENDED' | 'LEFT'
 }
 
+export interface Notification {
+  id: number
+  userId: number
+  eventId: number | null
+  clubId: number | null
+  subject: string
+  messageText: string | null
+  channel: 'IN_APP' | 'EMAIL' | 'TELEGRAM'
+  scheduledAt: string
+  sentAt: string | null
+  deliveryStatus: 'QUEUED' | 'SENT' | 'DELIVERED' | 'FAILED'
+  isRead: boolean
+}
+
 export interface LoginRequest {
   login: string
   password: string
