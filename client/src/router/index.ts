@@ -61,7 +61,8 @@ const router = createRouter({
         },
         { path: 'my-events', name: 'my-events', component: () => import('../pages/MyEventsPage.vue') },
         { path: 'my-clubs', name: 'my-clubs', component: () => import('../pages/MyClubsPage.vue') },
-        { path: 'profile', name: 'profile', component: () => import('../pages/ProfilePage.vue') }
+        { path: 'profile', name: 'profile', component: () => import('../pages/ProfilePage.vue') },
+        { path: 'notifications', name: 'notifications', component: () => import('../pages/NotificationsPage.vue') }
       ]
     }
   ]
