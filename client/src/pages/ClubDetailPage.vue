@@ -173,7 +173,7 @@ const club = computed(() => clubStore.currentClub)
 const clubId = computed(() => Number(route.params.id))
 const isOwner = computed(() => club.value && authStore.user && club.value.ownerUserId === authStore.user.id)
 const isActiveMember = computed(() =>
-  membershipStore.members.some(m => m.userId === authStore.user?.id && m.status === 'ACTIVE')
+  membershipStore.members.some(m => m.userId === authStore.user?.id && m.status === 'ACTIVE' && m.clubId === club.value?.id)
 )
 
 const statusSeverity = computed(() => {
@@ -258,10 +258,13 @@ async function onLeave() {
 onMounted(async () => {
   try {
     await clubStore.fetchClubById(clubId.value)
-    await membershipStore.fetchMembers(clubId.value)
   } catch (e: unknown) {
     const axiosErr = e as { response?: { data?: { message?: string } } }
     toast.add({ severity: 'error', summary: 'Ошибка', detail: axiosErr.response?.data?.message || 'Не удалось загрузить данные', life: 4000 })
+  }
+  try {
+    await membershipStore.fetchMembers(clubId.value)
+  } catch (e: unknown) {
   }
   loadEvents()
 })
