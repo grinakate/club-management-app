@@ -103,16 +103,22 @@ public class MembershipApplicationServiceImpl implements MembershipApplicationSe
 			application.setComment(comment);
 		}
 		if (decision == ApplicationStatus.APPROVED) {
-			if (membershipService.existsByClubIdAndUserIdAndStatus(application.getClub().getId(), application.getUser().getId(), MembershipStatus.ACTIVE)) {
-				throw new ResponseStatusException(HttpStatus.CONFLICT, "Пользователь уже является участником клуба");
+			var clubMembershipOpt = membershipService.findByClubIdAndUserId(application.getClub().getId(), application.getUser().getId());
+			if (clubMembershipOpt.isEmpty()) {
+				ClubMembership membership = new ClubMembership();
+				membership.setClub(application.getClub());
+				membership.setUser(application.getUser());
+				membership.setJoinedAt(LocalDateTime.now());
+				membership.setMemberRole(MembershipRole.MEMBER);
+				membership.setStatus(MembershipStatus.ACTIVE);
+				membershipService.save(membership);
+			} else {
+				var clubMembership = clubMembershipOpt.get();
+				if (clubMembership.getStatus().equals(MembershipStatus.ACTIVE)) {
+					throw new ResponseStatusException(HttpStatus.CONFLICT, "Пользователь уже является участником клуба");
+				}
+				clubMembership.setStatus(MembershipStatus.ACTIVE);
 			}
-			ClubMembership membership = new ClubMembership();
-			membership.setClub(application.getClub());
-			membership.setUser(application.getUser());
-			membership.setJoinedAt(LocalDateTime.now());
-			membership.setMemberRole(MembershipRole.MEMBER);
-			membership.setStatus(MembershipStatus.ACTIVE);
-			membershipService.save(membership);
 		}
 		MembershipApplication saved = repository.save(application);
 		notificationService.notifyApplicantOnApplicationReviewed(saved);

@@ -8,11 +8,15 @@ import edu.itmo.club.management.app.mapper.ClubMapper;
 import edu.itmo.club.management.app.mapper.EventMapper;
 import edu.itmo.club.management.domain.entity.Category;
 import edu.itmo.club.management.domain.entity.Club;
+import edu.itmo.club.management.domain.entity.ClubMembership;
 import edu.itmo.club.management.domain.entity.User;
 import edu.itmo.club.management.domain.enums.ClubStatus;
+import edu.itmo.club.management.domain.enums.MembershipRole;
+import edu.itmo.club.management.domain.enums.MembershipStatus;
 import edu.itmo.club.management.service.business.category.CategoryService;
 import edu.itmo.club.management.service.business.club.ClubService;
 import edu.itmo.club.management.service.business.event.EventService;
+import edu.itmo.club.management.service.business.membership.ClubMembershipService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -47,6 +51,7 @@ public class ClubController {
 	private final CategoryService categoryService;
 	private final EventService eventService;
 	private final EventMapper eventMapper;
+	private final ClubMembershipService clubMembershipService;
 
 	@GetMapping("/clubs")
 	public List<ClubResponse> findAll(@RequestParam(required = false) Long categoryId,
@@ -84,7 +89,17 @@ public class ClubController {
 		club.setStatus(ClubStatus.ACTIVE);
 		club.setCreatedAt(LocalDateTime.now());
 
-		return clubMapper.mapToResponse(clubService.save(club));
+		ClubMembership clubMembership = new ClubMembership();
+		clubMembership.setClub(club);
+		clubMembership.setUser(user);
+		clubMembership.setJoinedAt(LocalDateTime.now());
+		clubMembership.setStatus(MembershipStatus.ACTIVE);
+		clubMembership.setMemberRole(MembershipRole.ADMIN);
+
+		clubService.save(club);
+		clubMembershipService.save(clubMembership);
+
+		return clubMapper.mapToResponse(club);
 	}
 
 	@PutMapping("/clubs/{id}")

@@ -3,6 +3,7 @@ package edu.itmo.club.management.service.business.club;
 import edu.itmo.club.management.domain.entity.Club;
 import edu.itmo.club.management.domain.entity.ClubMembership;
 import edu.itmo.club.management.domain.enums.ClubStatus;
+import edu.itmo.club.management.domain.enums.MembershipStatus;
 import edu.itmo.club.management.domain.repository.ClubMembershipRepository;
 import edu.itmo.club.management.domain.repository.ClubRepository;
 import jakarta.validation.constraints.NotNull;
@@ -63,7 +64,7 @@ public class ClubServiceImpl implements ClubService {
 	@NotNull
 	@Override
 	public List<Club> findClubsByMemberUserId(@NotNull Long userId) {
-		return membershipRepository.findByUserId(userId).stream()
+		return membershipRepository.findByUserIdAndStatus(userId, MembershipStatus.ACTIVE).stream()
 				.map(ClubMembership::getClub)
 				.toList();
 	}

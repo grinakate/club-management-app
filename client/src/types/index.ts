@@ -48,6 +48,7 @@ export interface Event {
 export interface EventRegistration {
   id: number
   eventId: number
+  eventTitle: string
   userId: number
   userFullName?: string
   registeredAt: string
