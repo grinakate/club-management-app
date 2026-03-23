@@ -1,0 +1,44 @@
+services:
+  postgres:
+    container_name: db
+    image: postgres:16.2-alpine
+    environment:
+      POSTGRES_USER: club_management
+      POSTGRES_PASSWORD: club_management
+      POSTGRES_DB: club_management
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./database/initial.sql:/docker-entrypoint-initdb.d/initial.sql
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U club_management -d club_management"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  server:
+    container_name: server
+    build: ./server/club-management-parent
+    ports:
+      - '8080:8080'
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/club_management?currentSchema=club_management
+      SPRING_DATASOURCE_USERNAME: club_management
+      SPRING_DATASOURCE_PASSWORD: club_management
+      JWT_SECRET_KEY: 'very-secure-secret-key-32-characters-long'
+      JWT_EXPIRATION_MS: 86400000
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  client:
+    container_name: client
+    build: ./client
+    ports:
+      - '3000:3000'
+    depends_on:
+      - server
+
+volumes:
+  pgdata:
